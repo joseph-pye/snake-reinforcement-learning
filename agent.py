@@ -61,7 +61,7 @@ class Agent:
             
             # Food location
             game.food.x < game.head.x,
-            game.food.y > game.head.x,
+            game.food.x > game.head.x,
             game.food.y < game.head.y,
             game.food.y > game.head.y
         ]
@@ -88,9 +88,11 @@ class Agent:
         self.epsilon = 80 - self.n_games
         final_move = [0, 0, 0]
         if random.randint(0, 200) < self.epsilon:
+            print('Making random move')
             move = random.randint(0, 2)
             final_move[move] = 1
         else:
+            print('Making model guided move')
             state0 = torch.tensor(state, dtype=torch.float)
             prediction = self.model(state0)
             move = torch.argmax(prediction).item()

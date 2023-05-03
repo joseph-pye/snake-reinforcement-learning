@@ -47,27 +47,42 @@ class QTrainer:
             
             done = (done, )
             
+        print('State: ', 'DS, DR, DL, L, R, U, D, FL, FR, FD, FU')
+        print('State: ', state)
+        print('Next State: ', next_state)
+        print('Action: ', action)
+        print('Reward: ', reward)
+        print('Done: ', done)
+            
         # 1: predicted Q values with current state
         pred = self.model(state)
         
+        print('Q0_pred: ', pred)
+        
         target = pred.clone()
+        
         for idx in range(len(done)):
+            print('idx ', idx, ' of ', range(len(done)))
             Q_new = reward[idx]
-            print(Q_new)
-            print(reward)
-            print(torch.max(self.model(next_state[idx])))
             if not done[idx]:
+                print('Not done')
+                print('Q1_pred: ', self.model(next_state[idx]))
+                print('Gamma = ', self.gamma)
+                print('Reward = ', reward[idx])
                 Q_new = reward[idx] + torch.mul(torch.max(self.model(next_state[idx])), self.gamma[0])
+                print('Q1_max = reward + gamma * max(Q) = ', Q_new)
                 
-            target[idx][torch.argmax(action).item()] = Q_new   
+            target[idx][torch.argmax(action).item()] = Q_new
+            print('Target: ', target)
         
-        # 2: Q_new = r + gamma*max(next_predicted Q value) -> only if not done
-        # pred.clone()
-        # preds[argmax(action)] = Q_new
+        # zero_grad clears gradients from previous steps, otherwise they'll accumulate. We only want to solve for the current step's cost
         self.optimizer.zero_grad()
+        # calculate the loss for this step
         loss = self.criterion(target, pred)
+        # calculate the gradients of the loss using backprop
         loss.backward()
-        
+        # optimizer takes a step based on the gradients
         self.optimizer.step()
         
+        #input("Press Enter to continue...")
             
